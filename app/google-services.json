@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "854757915281",
+    "firebase_url": "https://vesafrijling-pset6.firebaseio.com",
+    "project_id": "vesafrijling-pset6",
+    "storage_bucket": "vesafrijling-pset6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:854757915281:android:3b2ba7bfa52111cc",
+        "android_client_info": {
+          "package_name": "com.example.vesaf.vesafrijling_pset6"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "854757915281-h0gm04qdcgdternp8fe9cf3d6b0j38ej.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.vesaf.vesafrijling_pset6",
+            "certificate_hash": "e27d0e1b5cadc5b06f61d46672b3564a91f93e05"
+          }
+        },
+        {
+          "client_id": "854757915281-5somelmac8nqrm169q8oq26qn2sidnf3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMO4ygc-6BiHFm1sk_61wupeBSgkwGDoI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "854757915281-5somelmac8nqrm169q8oq26qn2sidnf3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
