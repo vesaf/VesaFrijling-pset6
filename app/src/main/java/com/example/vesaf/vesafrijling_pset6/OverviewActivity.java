@@ -77,7 +77,6 @@ public class OverviewActivity extends AppCompatActivity {
                     // User is signed out
                     Log.d("", "onAuthStateChanged:signed_out");
                 }
-                // ...
             }
         };
 
