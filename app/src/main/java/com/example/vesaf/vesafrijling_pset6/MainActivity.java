@@ -17,7 +17,7 @@ import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity {
 
-    // afschermen voor niet ingelogden
+    // TODO: afschermen voor niet ingelogden
     private DatabaseReference database;
     private String userId;
 
@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     public void saveBudget(View view) {
         EditText budgetEt = (EditText) findViewById(R.id.budgetEditText);
         if (!budgetEt.getText().toString().equals("")) {
-            int amount = Integer.valueOf(budgetEt.getText().toString());
+            double amount = Double.valueOf(budgetEt.getText().toString());
 
             database.child("budgets").child(userId).setValue(amount);
 

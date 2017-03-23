@@ -40,8 +40,8 @@ public class ExpenseAdapter extends ArrayAdapter {
         String title = expense.getTitle();
         String amount = String.valueOf(expense.getAmount());
 
-        TextView listTv = (TextView) view.findViewById(R.id.textView4); // TV NAME!!!!!!!!!!!
-        listTv.setText(title + ": " + amount);
+        TextView listTv = (TextView) view.findViewById(R.id.textView4);
+        listTv.setText(title + ": €" + amount);
 
         view.setOnLongClickListener(new View.OnLongClickListener() {
             @Override

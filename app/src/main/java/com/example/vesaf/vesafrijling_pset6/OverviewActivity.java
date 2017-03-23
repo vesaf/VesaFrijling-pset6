@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -28,14 +29,14 @@ import java.util.ArrayList;
 public class OverviewActivity extends AppCompatActivity {
 
     //TODO: afschermen voor niet ingelogden
-    //TODO: eurotekens
+    //TODO: TV NAME
     //TODO: twee decimalen
     //TODO: horizontal layout
     //TODO: start waar gebleven
-    //TODO: tekst weg na invoeren
+    //TODO: variable scoping
 
 
-    int budget;
+    Double budget;
     ArrayList<Expense> expenses;
     private DatabaseReference database;
     private FirebaseAuth mAuth;
@@ -53,6 +54,9 @@ public class OverviewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_overview);
+
+        // make sure keyboard never over text view
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         setTitle("Expenses");
 
@@ -96,8 +100,8 @@ public class OverviewActivity extends AppCompatActivity {
                 }
                 else {
                     // get budget
-                    budget = dataSnapshot.child("budgets").child(userId).getValue(int.class);
-                    String budgetText = "Budget: " + String.valueOf(budget);
+                    budget = dataSnapshot.child("budgets").child(userId).getValue(Double.class);
+                    String budgetText = "Budget: €" + String.format("%.2f", budget);
                     budgetTv.setText(budgetText);
 
                     // get next id
@@ -109,8 +113,9 @@ public class OverviewActivity extends AppCompatActivity {
 
 
                     // get expenses
-                    expenses = new ArrayList<Expense>();
-                    Iterable<DataSnapshot> snapshot = dataSnapshot.child("expenses").child(userId).getChildren();
+                    expenses = new ArrayList<>();
+                    Iterable<DataSnapshot> snapshot
+                            = dataSnapshot.child("expenses").child(userId).getChildren();
 
                     for (DataSnapshot expense : snapshot) {
                         expenses.add(expense.getValue(Expense.class));
@@ -122,16 +127,18 @@ public class OverviewActivity extends AppCompatActivity {
                         totalExpenses += expense.getAmount();
                     }
 
+                    // set expenses and difference in text views
                     expensesTv = (TextView) findViewById(R.id.expensesTextView);
                     differenceTv = (TextView) findViewById(R.id.differenceTextView);
-                    String expensesString = "Expenses: " + String.valueOf(totalExpenses);
-                    String differenceString = "Money Left: " + String.valueOf(budget - totalExpenses);
+                    String expensesString = "Expenses: €"
+                            + String.format("%.2f", totalExpenses);
+                    String differenceString = "Money Left: €"
+                            + String.format("%.2f", budget - totalExpenses);
                     expensesTv.setText(expensesString);
                     differenceTv.setText(differenceString);
 
                     setAdapter();
                 }
-
             }
 
             @Override
@@ -143,15 +150,16 @@ public class OverviewActivity extends AppCompatActivity {
     }
 
     public void addExpense (View view) {
-        // EDITTEXT LEGEN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // define input editTexts and whether empty
         EditText amountEt = (EditText) findViewById(R.id.amountEditText);
         EditText titleEt = (EditText) findViewById(R.id.titleEditText);
 
-        if (!amountEt.getText().equals("") && !titleEt.getText().equals("")) {
+        if (!amountEt.getText().toString().equals("") && !titleEt.getText().toString().equals("")) {
             // setup new expense
             Double amount  = Double.valueOf(amountEt.getText().toString());
             String title = titleEt.getText().toString();
+            titleEt.setText("");
+            amountEt.setText("");
             Expense expense = new Expense(title, amount, String.valueOf(nextId));
 
             // add new expense
@@ -160,8 +168,10 @@ public class OverviewActivity extends AppCompatActivity {
 
             // update total expenses and difference
             totalExpenses += amount;
-            String expensesString = "Expenses: " + String.valueOf(totalExpenses);
-            String differenceString = "Money Left: " + String.valueOf(budget - totalExpenses);
+            String expensesString = "Expenses: €"
+                    + String.format("%.2f", totalExpenses);
+            String differenceString = "Money Left: €"
+                    + String.format("%.2f", budget - totalExpenses);
             expensesTv.setText(expensesString);
             differenceTv.setText(differenceString);
 
@@ -172,17 +182,18 @@ public class OverviewActivity extends AppCompatActivity {
     }
 
     public void deleteExpense(String id) {
+        // delete expense from database
         database.child("expenses").child(userId).child("Expense" + id).removeValue();
-
-
-        // loop through expenses for deleted expense and remove
+        // delete expense from list
         for (int i = 0; i < expenses.size(); i++) {
             if (expenses.get(i).getId().equals(id)) {
 
                 // update total expenses and difference
                 totalExpenses -= expenses.get(i).getAmount();
-                String expensesString = "Expenses: " + String.valueOf(totalExpenses);
-                String differenceString = "Money Left: " + String.valueOf(budget - totalExpenses);
+                String expensesString = "Expenses: €"
+                        + String.format("%.2f", totalExpenses);
+                String differenceString = "Money Left: €"
+                        + String.format("%.2f", budget - totalExpenses);
                 expensesTv.setText(expensesString);
                 differenceTv.setText(differenceString);
 
@@ -195,17 +206,20 @@ public class OverviewActivity extends AppCompatActivity {
     }
 
     public void setAdapter() {
+        // read expenses into list view
         adapter = new ExpenseAdapter(this, expenses);
         ListView listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(adapter);
     }
 
     public void changeBudget() {
+        // change budget by going back to MainActivity
         Intent intent = new Intent(OverviewActivity.this, MainActivity.class);
         startActivity(intent);
     }
 
     public void logout() {
+        // logout user and go to LoginActivity
         FirebaseAuth.getInstance().signOut();
         Intent intent = new Intent(OverviewActivity.this, LoginActivity.class);
         startActivity(intent);
@@ -214,6 +228,7 @@ public class OverviewActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        // setup menu
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
         return true;
@@ -236,12 +251,14 @@ public class OverviewActivity extends AppCompatActivity {
 
     @Override
     public void onStart() {
+        // setup authorization state listener
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
     }
 
     @Override
     public void onStop() {
+        // stop authorization state listener
         super.onStop();
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);

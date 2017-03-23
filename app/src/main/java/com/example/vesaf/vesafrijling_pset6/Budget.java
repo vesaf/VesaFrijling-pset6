@@ -7,7 +7,7 @@ import java.io.Serializable;
  */
 
 public class Budget implements Serializable{
-    private int amount;
+    private double amount;
     private String userId;
 
     public Budget() {}
@@ -17,11 +17,11 @@ public class Budget implements Serializable{
         userId = budgetUserId;
     }
 
-    public int getAmount() {
+    public double getAmount() {
         return amount;
     }
 
-    public void setAmount(int newAmount) {
+    public void setAmount(double newAmount) {
         amount = newAmount;
     }
 
