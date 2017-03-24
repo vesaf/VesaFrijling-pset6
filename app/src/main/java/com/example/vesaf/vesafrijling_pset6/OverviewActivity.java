@@ -22,29 +22,22 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 
 public class OverviewActivity extends AppCompatActivity {
 
-    //TODO: afschermen voor niet ingelogden
-    //TODO: TV NAME
-    //TODO: twee decimalen
-    //TODO: horizontal layout
     //TODO: start waar gebleven
     //TODO: variable scoping
-
+    //TODO: warnings
+    //TODO: onCreate smaller
 
     Double budget;
     ArrayList<Expense> expenses;
     private DatabaseReference database;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-    private FirebaseUser user;
     private String userId;
     private int nextId;
-    private ExpenseAdapter adapter;
     private double totalExpenses;
 
     private TextView expensesTv;
@@ -66,22 +59,21 @@ public class OverviewActivity extends AppCompatActivity {
         // setup user
         mAuth = FirebaseAuth.getInstance();
 
+        // check if logged in
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    // User is signed in
-                    Log.d("", "onAuthStateChanged:signed_in:" + user.getUid());
-                } else {
-                    // User is signed out
-                    Log.d("", "onAuthStateChanged:signed_out");
+                if (user == null) {
+                    Intent intent = new Intent(OverviewActivity.this, LoginActivity.class);
+                    startActivity(intent);
+                    finish();
                 }
             }
         };
 
         // get user ID
-        user = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             userId = user.getUid();
         }
@@ -93,7 +85,7 @@ public class OverviewActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 if (!dataSnapshot.child("budgets").hasChild(userId)) {
-                    Intent intent = new Intent(OverviewActivity.this, MainActivity.class);
+                    Intent intent = new Intent(OverviewActivity.this, BudgetActivity.class);
                     startActivity(intent);
                     finish();
                 }
@@ -129,12 +121,7 @@ public class OverviewActivity extends AppCompatActivity {
                     // set expenses and difference in text views
                     expensesTv = (TextView) findViewById(R.id.expensesTextView);
                     differenceTv = (TextView) findViewById(R.id.differenceTextView);
-                    String expensesString = "Expenses: €"
-                            + String.format("%.2f", totalExpenses);
-                    String differenceString = "Money Left: €"
-                            + String.format("%.2f", budget - totalExpenses);
-                    expensesTv.setText(expensesString);
-                    differenceTv.setText(differenceString);
+                    updateLables();
 
                     setAdapter();
                 }
@@ -167,12 +154,7 @@ public class OverviewActivity extends AppCompatActivity {
 
             // update total expenses and difference
             totalExpenses += amount;
-            String expensesString = "Expenses: €"
-                    + String.format("%.2f", totalExpenses);
-            String differenceString = "Money Left: €"
-                    + String.format("%.2f", budget - totalExpenses);
-            expensesTv.setText(expensesString);
-            differenceTv.setText(differenceString);
+            updateLables();
 
             // update nexId
             nextId += 1;
@@ -189,12 +171,7 @@ public class OverviewActivity extends AppCompatActivity {
 
                 // update total expenses and difference
                 totalExpenses -= expenses.get(i).getAmount();
-                String expensesString = "Expenses: €"
-                        + String.format("%.2f", totalExpenses);
-                String differenceString = "Money Left: €"
-                        + String.format("%.2f", budget - totalExpenses);
-                expensesTv.setText(expensesString);
-                differenceTv.setText(differenceString);
+                updateLables();
 
                 expenses.remove(i);
                 break;
@@ -204,16 +181,25 @@ public class OverviewActivity extends AppCompatActivity {
         setAdapter();
     }
 
+    public void updateLables() {
+        String expensesString = "Expenses: €"
+                + String.format("%.2f", totalExpenses);
+        String differenceString = "Money Left: €"
+                + String.format("%.2f", budget - totalExpenses);
+        expensesTv.setText(expensesString);
+        differenceTv.setText(differenceString);
+    }
+
     public void setAdapter() {
         // read expenses into list view
-        adapter = new ExpenseAdapter(this, expenses);
+        ExpenseAdapter adapter = new ExpenseAdapter(this, expenses);
         ListView listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(adapter);
     }
 
     public void changeBudget() {
-        // change budget by going back to MainActivity
-        Intent intent = new Intent(OverviewActivity.this, MainActivity.class);
+        // change budget by going back to BudgetActivity
+        Intent intent = new Intent(OverviewActivity.this, BudgetActivity.class);
         startActivity(intent);
     }
 

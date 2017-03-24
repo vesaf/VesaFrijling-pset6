@@ -38,7 +38,7 @@ public class ExpenseAdapter extends ArrayAdapter {
 
         final Expense expense = expenses.get(pos);
         String title = expense.getTitle();
-        String amount = String.valueOf(expense.getAmount());
+        String amount = String.format("%.2f", expense.getAmount());
 
         TextView listTv = (TextView) view.findViewById(R.id.textView4);
         listTv.setText(title + ": €" + amount);
@@ -51,14 +51,6 @@ public class ExpenseAdapter extends ArrayAdapter {
                 return true;
             }
         });
-
-        //KEEP FOR LATER FUNCTIONALITY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//        view.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                overviewActivity.openList(expense.getId());
-//            }
-//        });
 
         return view;
     }

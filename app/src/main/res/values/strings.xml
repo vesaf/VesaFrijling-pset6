@@ -6,4 +6,12 @@
     <string name="budget">Budget:</string>
     <string name="money_left">Money Left:</string>
     <string name="expenses">Expenses:</string>
+    <string name="enter_a_budget">Enter a budget...</string>
+    <string name="save">Save</string>
+    <string name="enter_password">Enter password</string>
+    <string name="login">Login</string>
+    <string name="enter_email">Enter email</string>
+    <string name="create_new_account">Create new account</string>
+    <string name="login_existing_account">Login existing account:</string>
+    <string name="sign_up">Sign Up</string>
 </resources>

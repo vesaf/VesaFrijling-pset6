@@ -8,28 +8,25 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.vesaf.vesafrijling_pset6.MainActivity">
+    tools:context="com.example.vesaf.vesafrijling_pset6.BudgetActivity">
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:inputType="number"
         android:ems="10"
-        android:hint="Enter a budget..."
+        android:hint="@string/enter_a_budget"
         android:id="@+id/budgetEditText"
         android:layout_centerVertical="true"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
     <Button
-        android:text="Save"
+        android:text="@string/save"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/button"
+        android:id="@+id/saveButton"
         android:onClick="saveBudget"
         android:layout_alignTop="@+id/budgetEditText"
-        android:layout_toRightOf="@+id/budgetEditText"
         android:layout_toEndOf="@+id/budgetEditText"
-        android:layout_marginLeft="15dp"
         android:layout_marginStart="15dp" />
 </RelativeLayout>
