@@ -1,10 +1,17 @@
+/*
+* Vesa Frijling - 10782885
+* Problemset 6 - Expenses
+* 24-03-2017
+*
+* In this activity the user is prompted to log in or create a new account.
+ */
+
 package com.example.vesaf.vesafrijling_pset6;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
@@ -20,6 +27,10 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
+    /*
+    * Sets up activity and checks if a user is already logged in, if so the user is taken straight
+    * to the OverviewActivity.
+    */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,6 +40,7 @@ public class LoginActivity extends AppCompatActivity {
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
+        // Check user status
         mAuth = FirebaseAuth.getInstance();
 
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -36,8 +48,8 @@ public class LoginActivity extends AppCompatActivity {
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
-                    // User is signed in
-                    Intent intent = new Intent(LoginActivity.this, OverviewActivity.class);
+                    // If user is signed in send to Dispatcher
+                    Intent intent = new Intent(LoginActivity.this, Dispatcher.class);
                     startActivity(intent);
                     finish();
                 }
@@ -45,15 +57,18 @@ public class LoginActivity extends AppCompatActivity {
         };
     }
 
+    /*
+    * Create a new user with data entered in appropriate editTexts.
+     */
     public void createUser(View view) {
-        // setup signup edit texts and retrieve data
+        // Setup signup edit texts and retrieve data
         EditText newEmailEt = (EditText) findViewById(R.id.newEmailEditText);
         EditText newPasswordEt = (EditText) findViewById(R.id.newPasswordEditText);
 
         final String email = newEmailEt.getText().toString();
         String password = newPasswordEt.getText().toString();
 
-        // make sure password not empty and longer than 5 characters
+        // Make sure password not empty and longer than 5 characters
         if (email.equals("") || password.equals("")) {
             Toast.makeText(LoginActivity.this, "Authentication failed.",
                     Toast.LENGTH_SHORT).show();
@@ -67,11 +82,8 @@ public class LoginActivity extends AppCompatActivity {
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
-                            Log.d("", "createUserWithEmail:onComplete:" + task.isSuccessful());
-
                             // If sign in fails, display a message to the user. If sign in succeeds
-                            // the auth state listener will be notified and logic to handle the
-                            // signed in user can be handled in the listener.
+                            // the auth state listener will be notified.
                             if (!task.isSuccessful()) {
                                 Toast.makeText(LoginActivity.this, "Authentication failed.",
                                         Toast.LENGTH_SHORT).show();
@@ -84,15 +96,19 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /*
+    * Logs in user using data from appropriate editTexts.
+    * Then sends the user to the OverviewActivity.
+     */
     public void loginUser(View view) {
-        // setup login edit texts and retrieve data
+        // Setup login edit texts and retrieve data
         EditText emailEt = (EditText) findViewById(R.id.emailEditText);
         EditText passwordEt = (EditText) findViewById(R.id.passwordEditText);
 
         final String email = emailEt.getText().toString();
         String password = passwordEt.getText().toString();
 
-        // make sure no empty fields
+        // Make sure no empty fields
         if (email.equals("") || password.equals("")) {
             Toast.makeText(LoginActivity.this, "Authentication failed.",
                     Toast.LENGTH_SHORT).show();
@@ -102,20 +118,17 @@ public class LoginActivity extends AppCompatActivity {
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
-                    Log.d("", "signInWithEmail:onComplete:" + task.isSuccessful());
-
                     // If sign in fails, display a message to the user. If sign in succeeds
-                    // the auth state listener will be notified and logic to handle the
-                    // signed in user can be handled in the listener.
+                    // the auth state listener will be notified and user will be sent to
+                    // Dispatcher.
                     if (!task.isSuccessful()) {
-                        Log.w("", "signInWithEmail", task.getException());
                         Toast.makeText(LoginActivity.this, "Authentication failed.",
                                 Toast.LENGTH_SHORT).show();
                     }
                     else {
                         Toast.makeText(LoginActivity.this, email + " logged in!",
                                 Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(LoginActivity.this, OverviewActivity.class);
+                        Intent intent = new Intent(LoginActivity.this, Dispatcher.class);
                         startActivity(intent);
                         finish();
                     }
@@ -124,12 +137,18 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /*
+     * Setup authorization state listener on activity start.
+     */
     @Override
     public void onStart() {
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
     }
 
+    /*
+     * Stop authorization state listener on activity stop.
+     */
     @Override
     public void onStop() {
         super.onStop();

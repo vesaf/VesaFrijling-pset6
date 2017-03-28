@@ -1,6 +1,16 @@
+/**
+ * Vesa Frijling - 10782885
+ * Problemset 6 - Expenses
+ * 25-03-2017
+ *
+ * Process list of expenses and put them into listView with an on long click listener.
+ * Also able to get amount of items in listView.
+ */
+
 package com.example.vesaf.vesafrijling_pset6;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,26 +19,27 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-/**
- * Created by vesaf on 3/13/2017.
- */
-
-public class ExpenseAdapter extends ArrayAdapter {
+class ExpenseAdapter extends ArrayAdapter<Expense> {
     private ArrayList<Expense> expenses;
     private Context context;
     private OverviewActivity overviewActivity;
 
-    // Constructor
-    public ExpenseAdapter(Context context, ArrayList<Expense> data) {
+    /*
+     *Constructor
+     */
+    ExpenseAdapter(Context context, ArrayList<Expense> data) {
         super(context,0, data);
         this.expenses = data;
         this.overviewActivity = (OverviewActivity) context;
         this.context = context;
     }
 
-    // get the view and return it
+    /*
+     * Fill ListView based on expenses given in argument.
+     * Also sets on long click listener for eacht list item.
+     */
     @Override
-    public View getView(int pos, View convertView, ViewGroup parent) {
+    public @NonNull View getView(int pos, View convertView, @NonNull ViewGroup parent) {
         View view = convertView;
 
         if (view == null){
@@ -55,7 +66,9 @@ public class ExpenseAdapter extends ArrayAdapter {
         return view;
     }
 
-    // get the count
+    /*
+     * Get amount of list items.
+     */
     @Override
     public int getCount() {
         return super.getCount();

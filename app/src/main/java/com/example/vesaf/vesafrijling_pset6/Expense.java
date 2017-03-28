@@ -1,19 +1,30 @@
+/**
+ * Vesa Frijling - 10782885
+ * Problemset 6 - Expenses
+ * 25-03-2017
+ *
+ * Defines an expense object. The object contains: a title, an amount and an id. Also contains a
+ * getter method for each variable.
+ */
+
 package com.example.vesaf.vesafrijling_pset6;
 
 import java.io.Serializable;
 
-/**
- * Created by vesaf on 3/17/2017.
- */
-
-public class Expense implements Serializable{
+class Expense implements Serializable{
     private String title;
     private double amount;
     private String id;
 
+    /*
+     * Constructor required by Firebase.
+     */
     public Expense() {}
 
-    public Expense(String expenseTitle, double expenseAmount, String expenseId) {
+    /*
+     * Constructor.
+     */
+    Expense(String expenseTitle, double expenseAmount, String expenseId) {
         title = expenseTitle;
         amount = expenseAmount;
         id = expenseId;
@@ -23,24 +34,12 @@ public class Expense implements Serializable{
         return title;
     }
 
-    public void setTitle(String newTitle) {
-        title = newTitle;
-    }
-
-    public double getAmount() {
+    double getAmount() {
         return amount;
-    }
-
-    public void setAmount(double newAmount) {
-        amount = newAmount;
     }
 
     public String getId() {
         return id;
-    }
-
-    public void setId(String newId) {
-        id = newId;
     }
 
 }

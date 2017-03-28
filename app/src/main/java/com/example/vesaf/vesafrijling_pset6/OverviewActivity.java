@@ -1,6 +1,17 @@
+/*
+* Vesa Frijling - 10782885
+* Problemset 6 - Expenses
+* 24-03-2017
+*
+* In this activity users can view their expenses, add expenses, delete expenses, see their budget,
+* see their total expenses and see how much money they have left (i.e. budget - expenses).
+* It is the main activity.
+ */
+
 package com.example.vesaf.vesafrijling_pset6;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -26,11 +37,7 @@ import java.util.ArrayList;
 
 public class OverviewActivity extends AppCompatActivity {
 
-    //TODO: start waar gebleven
-    //TODO: variable scoping
-    //TODO: warnings
-    //TODO: onCreate smaller
-
+    // variable definitions
     Double budget;
     ArrayList<Expense> expenses;
     private DatabaseReference database;
@@ -40,26 +47,35 @@ public class OverviewActivity extends AppCompatActivity {
     private int nextId;
     private double totalExpenses;
 
+    // Set expenses and difference in text views
     private TextView expensesTv;
     private TextView differenceTv;
+    private TextView budgetTv;
 
+    /*
+    * Setup activity by loading data from Firebase.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_overview);
 
-        // make sure keyboard never over text view
+        // Make sure keyboard never over text view
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         setTitle("Expenses");
 
-        // get database
+        expensesTv = (TextView) findViewById(R.id.expensesTextView);
+        differenceTv = (TextView) findViewById(R.id.differenceTextView);
+        budgetTv = (TextView) findViewById(R.id.budgetTextView);
+
+        // Get database
         database = FirebaseDatabase.getInstance().getReference();
 
-        // setup user
+        // Setup user
         mAuth = FirebaseAuth.getInstance();
 
-        // check if logged in
+        // Check if logged in
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -71,39 +87,44 @@ public class OverviewActivity extends AppCompatActivity {
                 }
             }
         };
+        getData();
+    }
 
-        // get user ID
+    /*
+* Retrieve data from Firebase as well as make sure a budget has been set (if not make user set
+* a new budget).
+* I am aware of the length, however splitting it to two listeners introduced synchronity issues.
+ */
+    public void getData() {
+        // Get user ID
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             userId = user.getUid();
         }
-        // if exists create new budget else setup screen
-        final TextView budgetTv = (TextView) findViewById(R.id.budgetTextView);
 
         ValueEventListener postListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
+                // If no budget set go to budgetActivity
                 if (!dataSnapshot.child("budgets").hasChild(userId)) {
                     Intent intent = new Intent(OverviewActivity.this, BudgetActivity.class);
                     startActivity(intent);
                     finish();
                 }
+                // Retrieve all data
                 else {
-                    // get budget
                     budget = dataSnapshot.child("budgets").child(userId).getValue(Double.class);
                     String budgetText = "Budget: €" + String.format("%.2f", budget);
                     budgetTv.setText(budgetText);
 
-                    // get next id
+                    // Get next id
                     if (dataSnapshot.child("ids").hasChild(userId)) {
                         nextId = dataSnapshot.child("ids").child(userId).getValue(int.class);
                     } else {
                         nextId = 0;
                     }
 
-
-                    // get expenses
+                    // Get expenses
                     expenses = new ArrayList<>();
                     Iterable<DataSnapshot> snapshot
                             = dataSnapshot.child("expenses").child(userId).getChildren();
@@ -112,75 +133,84 @@ public class OverviewActivity extends AppCompatActivity {
                         expenses.add(expense.getValue(Expense.class));
                     }
 
-                    // get total expenses and difference
+                    // Get total expenses and difference
                     totalExpenses = 0;
                     for (Expense expense : expenses) {
                         totalExpenses += expense.getAmount();
                     }
 
-                    // set expenses and difference in text views
-                    expensesTv = (TextView) findViewById(R.id.expensesTextView);
-                    differenceTv = (TextView) findViewById(R.id.differenceTextView);
                     updateLables();
 
                     setAdapter();
                 }
             }
 
+            // When data retrieval failed send toast
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.w("", "Failed to read value");
+                // Note: didn't coose a toast as this fires as well when the user logs out, so he'd
+                // get a toast everytime they log out
+                Log.d("ERROR", "Could not retrieve data");
             }
         };
         database.addValueEventListener(postListener);
     }
 
+    /*
+    * Used to add an expense to the in app list of expenses and the Firebase database.
+    * Called when 'Add' button clicked, gets data from editTexts and saves it on Firebase
+    * and in internal list.
+     */
     public void addExpense (View view) {
-        // define input editTexts and whether empty
+        // Define input editTexts and whether empty
         EditText amountEt = (EditText) findViewById(R.id.amountEditText);
         EditText titleEt = (EditText) findViewById(R.id.titleEditText);
 
         if (!amountEt.getText().toString().equals("") && !titleEt.getText().toString().equals("")) {
-            // setup new expense
+            // Setup new expense
             Double amount  = Double.valueOf(amountEt.getText().toString());
             String title = titleEt.getText().toString();
             titleEt.setText("");
             amountEt.setText("");
             Expense expense = new Expense(title, amount, String.valueOf(nextId));
 
-            // add new expense
+            // Add new expense
             String expenseChild = "Expense" + String.valueOf(nextId);
             database.child("expenses").child(userId).child(expenseChild).setValue(expense);
 
-            // update total expenses and difference
+            // Update total expenses and difference
             totalExpenses += amount;
-            updateLables();
 
-            // update nexId
+            // Update nexId
             nextId += 1;
             database.child("ids").child(userId).setValue(nextId);
         }
     }
 
+    /*
+    * Deletes an expense from the internal expenses list and from Firebase.
+    * Called when long-pressing on an expense.
+     */
     public void deleteExpense(String id) {
-        // delete expense from database
+        // Delete expense from database
         database.child("expenses").child(userId).child("Expense" + id).removeValue();
-        // delete expense from list
+
+        // Delete expense from list
         for (int i = 0; i < expenses.size(); i++) {
             if (expenses.get(i).getId().equals(id)) {
-
-                // update total expenses and difference
+                // Update total expenses and difference
                 totalExpenses -= expenses.get(i).getAmount();
-                updateLables();
 
                 expenses.remove(i);
                 break;
             }
         }
-
-        setAdapter();
     }
 
+    /*
+    * Reload text in 'expenses' and 'money left' textViews.
+    * Called when data changed.
+     */
     public void updateLables() {
         String expensesString = "Expenses: €"
                 + String.format("%.2f", totalExpenses);
@@ -190,38 +220,50 @@ public class OverviewActivity extends AppCompatActivity {
         differenceTv.setText(differenceString);
     }
 
+    /*
+    * Setup ExpenseAdapter to read expenses into listView.
+     */
     public void setAdapter() {
-        // read expenses into list view
         ExpenseAdapter adapter = new ExpenseAdapter(this, expenses);
         ListView listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(adapter);
     }
 
+    /*
+    * Takes users to BudgetActivity.
+    * Called when 'Change Budget' chosen in menu.
+     */
     public void changeBudget() {
-        // change budget by going back to BudgetActivity
         Intent intent = new Intent(OverviewActivity.this, BudgetActivity.class);
         startActivity(intent);
     }
 
+    /*
+    * Logs out user and takes them back to LoginActivity.
+    * Called when 'Logout' chosen in menu.
+     */
     public void logout() {
-        // logout user and go to LoginActivity
         FirebaseAuth.getInstance().signOut();
         Intent intent = new Intent(OverviewActivity.this, LoginActivity.class);
         startActivity(intent);
         finish();
     }
 
+    /*
+    * Sets up menu.
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // setup menu
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
         return true;
     }
 
+    /*
+    * Handles item selection from menu.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
         switch (item.getItemId()) {
             case R.id.change_budget:
                 changeBudget();
@@ -234,19 +276,37 @@ public class OverviewActivity extends AppCompatActivity {
         }
     }
 
+    /*
+    * Setup authorization state listener on activity start.
+     */
     @Override
     public void onStart() {
-        // setup authorization state listener
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
     }
 
+    /*
+    * Stop authorization state listener on activity stop.
+     */
     @Override
     public void onStop() {
-        // stop authorization state listener
         super.onStop();
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
         }
+    }
+
+
+    /*
+     * Store last used activity
+     */
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        SharedPreferences prefs = getSharedPreferences("X", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("lastActivity", getClass().getName());
+        editor.apply();
     }
 }

@@ -16,7 +16,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".OverviewActivity" />
-        <activity android:name=".BudgetActivity"></activity>
+        <activity
+            android:name=".BudgetActivity"
+            android:launchMode="singleInstance" />
+        <activity android:name=".Dispatcher"></activity>
     </application>
 
 </manifest>
