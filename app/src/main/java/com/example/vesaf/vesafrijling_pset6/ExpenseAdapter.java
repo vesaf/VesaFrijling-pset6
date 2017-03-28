@@ -46,7 +46,7 @@ class ExpenseAdapter extends ArrayAdapter<Expense> {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = inflater.inflate(R.layout.list_item, parent, false);
         }
-
+        // fill ListView with 'title: €amount'
         final Expense expense = expenses.get(pos);
         String title = expense.getTitle();
         String amount = String.format("%.2f", expense.getAmount());
